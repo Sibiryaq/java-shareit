@@ -5,7 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.exception.users.UserInvalidDataException;
 
-import java.util.Collection;
+import java.util.List;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -23,7 +23,7 @@ public class UserService {
         return UserMapper.toUserDto(inMemoryUserStorage.update(UserMapper.toUser(userDto), userId));
     }
 
-    public Collection<UserDto> getAllUsers() {
+    public List<UserDto> getAllUsers() {
         return inMemoryUserStorage.getAll().stream().map(UserMapper::toUserDto).collect(Collectors.toList());
     }
 

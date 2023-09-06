@@ -7,7 +7,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
-import java.util.Collection;
+import java.util.List;
 
 /**
  * TODO Sprint add-controllers.
@@ -45,14 +45,14 @@ public class ItemController {
     }
 
     @GetMapping
-    public Collection<ItemDto> getAllItems(@RequestHeader("X-Sharer-User-Id") Long userId) {
+    public List<ItemDto> getAllItems(@RequestHeader("X-Sharer-User-Id") Long userId) {
         log.info("user id = {} запрашивает список всех вещей", userId);
         return itemService.getItemsByUserId(userId);
     }
 
     @ResponseStatus(HttpStatus.OK)
     @GetMapping("/search")
-    public Collection<ItemDto> getAvailableItemsForRent(@RequestParam String text) {
+    public List<ItemDto> getAvailableItemsForRent(@RequestParam String text) {
         log.info("Запрос на поиск {}", text);
         return itemService.getAvailableItemsForRentByKeyword(text);
     }

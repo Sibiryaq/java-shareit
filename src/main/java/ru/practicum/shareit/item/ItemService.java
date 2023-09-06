@@ -8,7 +8,7 @@ import ru.practicum.shareit.exception.users.UserNotFoundException;
 import ru.practicum.shareit.user.User;
 import ru.practicum.shareit.user.UserStorage;
 
-import java.util.Collection;
+import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -43,14 +43,14 @@ public class ItemService {
         return ItemMapper.toItemDto(itemStorage.updateItem(itemId, userId, item));
     }
 
-    public Collection<ItemDto> getItemsByUserId(Long userId) {
+    public List<ItemDto> getItemsByUserId(Long userId) {
         return itemStorage.getById(userId).stream()
                 .filter(item -> item.getOwner().getId().equals(userId))
                 .map(ItemMapper::toItemDto)
                 .collect(Collectors.toList());
     }
 
-    public Collection<ItemDto> getAvailableItemsForRentByKeyword(String text) {
+    public List<ItemDto> getAvailableItemsForRentByKeyword(String text) {
         return itemStorage.getByKeyWords(text).stream()
                 .filter(Item::getAvailable)
                 .map(ItemMapper::toItemDto)

@@ -1,6 +1,6 @@
 package ru.practicum.shareit.item;
 
-import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 
 public interface ItemStorage {
@@ -10,7 +10,7 @@ public interface ItemStorage {
 
     Item updateItem(Long itemId, Long userId, Item itemUpdate);
 
-    Collection<Item> getById(Long userId);
+    List<Item> getById(Long userId);
 
-    Collection<Item> getByKeyWords(String text);
+    List<Item> getByKeyWords(String text);
 }

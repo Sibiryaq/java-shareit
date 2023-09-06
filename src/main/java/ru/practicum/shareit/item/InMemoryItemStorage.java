@@ -61,12 +61,12 @@ public class InMemoryItemStorage implements ItemStorage {
     }
 
     @Override
-    public Collection<Item> getById(Long userId) {
-        return itemMap.values();
+    public List<Item> getById(Long userId) {
+        return new ArrayList<>(itemMap.values());
     }
 
     @Override
-    public Collection<Item> getByKeyWords(String text) {
+    public List<Item> getByKeyWords(String text) {
         if (text == null || text.isEmpty()) return List.of();
         String lowerCaseText = text.toLowerCase();
 
