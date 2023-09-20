@@ -2,62 +2,48 @@ package ru.practicum.shareit.user;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
+import ru.practicum.shareit.exception.ConflictException;
+import ru.practicum.shareit.exception.NotFoundException;
 
 import javax.validation.Valid;
 import java.util.List;
 
-/**
- * TODO Sprint add-controllers.
- */
-@RestController
 @Slf4j
-@RequiredArgsConstructor
+@RestController
 @RequestMapping(path = "/users")
+@RequiredArgsConstructor
 public class UserController {
 
     private final UserService userService;
 
     @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
-    public UserDto createUser(@Valid @RequestBody UserDto userDto) {
-        if (userDto.getEmail() == null || userDto.getEmail().isEmpty()) {
-            log.error("Email не может быть пустым");
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
-        }
-
-        log.info("Запрос на добавление пользователя {}", userDto);
-        return userService.addUser(userDto);
+    public User add(@Valid @RequestBody User user) throws ConflictException {
+        log.info("Получен запрос POST /users");
+        return userService.add(user);
     }
 
-    @PatchMapping("/{userId}")
-    @ResponseStatus(HttpStatus.OK)
-    public UserDto updateUser(@PathVariable Long userId,
-                              @Valid @RequestBody UserDto userDto) {
-        log.info("Запрос на обновление пользователя с id = {}, новые данные: {}", userId, userDto);
-        return userService.updateUser(userDto, userId);
+    @GetMapping(value = "/{id}")
+    public User getUserById(@PathVariable long id) throws NotFoundException {
+        log.info(String.format("Получен запрос GET /users/%s", id));
+        return userService.getUserById(id);
     }
 
     @GetMapping
-    @ResponseStatus(HttpStatus.OK)
-    public List<UserDto> getAllUsers() {
-        log.info("Запрос на получение списка пользователей");
+    public List<User> getAllUsers() {
+        log.info("Получен запрос GET /users");
         return userService.getAllUsers();
     }
 
-    @GetMapping("/{userId}")
-    @ResponseStatus(HttpStatus.OK)
-    public UserDto getUserById(@PathVariable Long userId) {
-        log.info("Запрос на получение данных пользователя с  id = {}", userId);
-        return userService.getUserById(userId);
+    @PatchMapping(value = "/{id}")
+    public User update(@RequestBody User user, @PathVariable long id) throws NotFoundException {
+        log.info(String.format("Получен запрос PATCH /users/%s", id));
+        return userService.update(user, id);
     }
 
-    @DeleteMapping("/{userId}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteUserById(@PathVariable Long userId) {
-        log.info("Запрос на удаления пользователя с id = {}", userId);
-        userService.deleteUserById(userId);
+    @DeleteMapping(value = "/{id}")
+    public void delete(@PathVariable long id) {
+        log.info(String.format("Получен запрос DELETE /users/%s", id));
+        userService.delete(id);
     }
 }

@@ -1,38 +1,67 @@
 package ru.practicum.shareit.user;
 
-import lombok.RequiredArgsConstructor;
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import ru.practicum.shareit.exception.users.UserInvalidDataException;
+import ru.practicum.shareit.exception.ConflictException;
+import ru.practicum.shareit.exception.NotFoundException;
+import ru.practicum.shareit.user.storage.UserRepository;
 
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Optional;
 
 @Slf4j
 @Service
-@RequiredArgsConstructor
+@AllArgsConstructor
 public class UserService {
 
-    private final InMemoryUserStorage inMemoryUserStorage;
+    private final UserRepository userRepository;
 
-    public UserDto addUser(UserDto userDto) {
-        return UserMapper.toUserDto(inMemoryUserStorage.add(UserMapper.toUser(userDto)));
+    public User add(User user) throws ConflictException {
+        try {
+            log.info("Добавлен новый User");
+            return userRepository.save(user);
+        } catch (Exception e) {
+            throw new ConflictException("Такой User уже существует");
+        }
     }
 
-    public UserDto updateUser(UserDto userDto, Long userId) {
-        return UserMapper.toUserDto(inMemoryUserStorage.update(UserMapper.toUser(userDto), userId));
+    public User getUserById(long id) throws NotFoundException {
+        Optional<User> userIdDatabase = userRepository.findById(id);
+        if (userIdDatabase.isPresent()) {
+            log.info("Получен User с id: " + id);
+            return userIdDatabase.get();
+        } else {
+            throw new NotFoundException("Пользователь не найден");
+        }
     }
 
-    public List<UserDto> getAllUsers() {
-        return inMemoryUserStorage.getAll().stream().map(UserMapper::toUserDto).collect(Collectors.toList());
+    public List<User> getAllUsers() {
+        return userRepository.findAll();
     }
 
-    public UserDto getUserById(Long userId) {
-        return UserMapper.toUserDto(inMemoryUserStorage.getById(userId)
-                .orElseThrow(() -> new UserInvalidDataException("Попытка получить пользователя с отсутствующим id: " + userId)));
+    public User update(User user, long id) throws NotFoundException {
+        User userToUpdate = userRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("User не найден"));
+
+        if (user.getName() != null) {
+            userToUpdate.setName(user.getName());
+        }
+
+        if (user.getEmail() != null) {
+            userToUpdate.setEmail(user.getEmail());
+        }
+
+        log.info("Обновлен пользователь с id: " + id);
+        try {
+            return userRepository.save(userToUpdate);
+        } catch (Exception e) {
+            throw new ConflictException(e.getMessage());
+        }
     }
 
-    public void deleteUserById(Long userId) {
-        inMemoryUserStorage.deleteById(userId);
+    public void delete(long id) {
+        log.info("Удалён User с id: " + id);
+        userRepository.deleteById(id);
     }
 }

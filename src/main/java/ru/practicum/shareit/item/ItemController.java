@@ -1,59 +1,63 @@
 package ru.practicum.shareit.item;
 
-import lombok.RequiredArgsConstructor;
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import ru.practicum.shareit.exception.BadRequestException;
+import ru.practicum.shareit.exception.NotFoundException;
+import ru.practicum.shareit.item.dto.CommentDto;
+import ru.practicum.shareit.item.dto.ItemDto;
 
 import javax.validation.Valid;
 import java.util.List;
 
-/**
- * TODO Sprint add-controllers.
- */
+import static ru.practicum.shareit.item.dto.CommentMapper.toCommentDto;
+
 @Slf4j
-@Validated
-@RequiredArgsConstructor
 @RestController
+@AllArgsConstructor
 @RequestMapping("/items")
 public class ItemController {
-
     private final ItemService itemService;
 
-    @ResponseStatus(HttpStatus.CREATED)
     @PostMapping
-    public ItemDto addNewItem(@Valid @RequestBody ItemDto itemDto,
-                              @RequestHeader("X-Sharer-User-Id") Long userId) {
-        log.info("Запрос на добавление новой вещи {} пользователем с id = {}", itemDto, userId);
-        return itemService.addNewItem(itemDto, userId);
+    public ItemDto addItem(@RequestBody @Valid ItemDto dto, @RequestHeader("X-Sharer-User-Id") long ownerId)
+            throws NotFoundException {
+        log.info("Получен запрос POST /items");
+        return itemService.addItem(dto, ownerId);
     }
 
-    @ResponseStatus(HttpStatus.OK)
-    @PatchMapping("/{itemId}")
-    public ItemDto changeItem(@PathVariable Long itemId,
-                              @RequestHeader("X-Sharer-User-Id") Long userId,
-                              @Valid @RequestBody ItemDto itemDto) {
-        log.info("Запрос на обмен вещи {}", itemDto);
-        return itemService.updateItem(itemId, userId, itemDto);
+    @PatchMapping(value = "/{itemId}")
+    public ItemDto patchItem(@RequestBody ItemDto dto, @PathVariable long itemId,
+                             @RequestHeader("X-Sharer-User-Id") long ownerId) throws NotFoundException {
+        log.info(String.format("Получен запрос PATCH /items/%s", itemId));
+        return itemService.patchItem(dto, ownerId, itemId);
     }
 
-    @GetMapping("/{itemId}")
-    public ItemDto getItemInfo(@PathVariable Long itemId) {
-        log.info("Запрос информации об вещи с id = {}", itemId);
-        return itemService.getItemInfo(itemId);
+    @GetMapping(value = "/{itemId}")
+    public ItemDto getItem(@PathVariable long itemId, @RequestHeader("X-Sharer-User-Id") long ownerId) throws NotFoundException {
+        log.info(String.format("Получен запрос GET /items/%s", itemId));
+        return itemService.getItem(itemId, ownerId);
     }
 
     @GetMapping
-    public List<ItemDto> getAllItems(@RequestHeader("X-Sharer-User-Id") Long userId) {
-        log.info("user id = {} запрашивает список всех вещей", userId);
-        return itemService.getItemsByUserId(userId);
+    public List<ItemDto> getAllItemsByOwner(@RequestHeader("X-Sharer-User-Id") long ownerId) {
+        log.info("Получен запрос GET /items");
+        return itemService.getAllItemsByOwner(ownerId);
     }
 
-    @ResponseStatus(HttpStatus.OK)
     @GetMapping("/search")
-    public List<ItemDto> getAvailableItemsForRent(@RequestParam String text) {
-        log.info("Запрос на поиск {}", text);
-        return itemService.getAvailableItemsForRentByKeyword(text);
+    public List<ItemDto> searchItem(@RequestParam String text, @RequestHeader("X-Sharer-User-Id") long ownerId) {
+        log.info(String.format("Получен запрос GET /items/search?text=%s", text));
+        return itemService.searchItem(text.toLowerCase(), ownerId);
+    }
+
+    @PostMapping("{itemId}/comment")
+    public CommentDto addComment(@RequestBody @Valid Comment dto, @PathVariable long itemId,
+                                 @RequestHeader("X-Sharer-User-Id") long authorId)
+            throws BadRequestException {
+        log.info("Получен запрос POST /items/" + itemId + "/comment");
+        Comment comment = itemService.addComment(dto, itemId, authorId);
+        return toCommentDto(comment);
     }
 }
