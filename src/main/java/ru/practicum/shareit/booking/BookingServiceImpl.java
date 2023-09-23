@@ -56,7 +56,7 @@ public class BookingServiceImpl implements BookingService {
             Booking savedBooking = bookingRepository.save(booking);
             return bookingMapper.toFullBookingFromBooking(savedBooking);
         } else {
-            throw new BadRequestException("Ошибка");
+            throw new BadRequestException("Неверные параметры запроса для бронирования");
         }
     }
 
@@ -75,23 +75,19 @@ public class BookingServiceImpl implements BookingService {
         Item item;
         try {
             item = booking.getItem();
-            if (item == null)
-                throw new NotFoundException("Не найден владелец вещи");
-            if (item.getUser().getId() != itemOwnerId) {
+            if (item == null || item.getUser().getId() != itemOwnerId) {
                 throw new NotFoundException("Не найден владелец вещи");
             }
         } catch (Exception e) {
             throw new NotFoundException("Не найден владелец вещи");
         }
 
-        User booker = booking.getBooker();
         BookingDto dto = bookingMapper.toBookingDto(booking);
         dto.setId(bookingId);
-        Booking updatedBooking;
         Status status;
 
         if (booking.getStatus() == Status.APPROVED && approved) {
-            throw new BadRequestException("Ошибка");
+            throw new BadRequestException("Неверные параметры запроса для бронирования");
         }
 
         if (approved) {
@@ -100,11 +96,9 @@ public class BookingServiceImpl implements BookingService {
             status = Status.REJECTED;
         }
 
-        dto.setStatus(status);
+        booking.setStatus(status); //обновили статус прямо у сущности booking
 
-        updatedBooking = bookingMapper.toBooking(dto, item, booker);
-
-        return bookingMapper.toFullBookingFromBooking(bookingRepository.save(updatedBooking));
+        return bookingMapper.toFullBookingFromBooking(bookingRepository.save(booking)); //сохранили обновленную сущность
     }
 
     @Transactional(readOnly = true)
@@ -173,6 +167,7 @@ public class BookingServiceImpl implements BookingService {
             throw new NotFoundException("Не найден хозяин бронирования");
         }
     }
+
 
     @Transactional(readOnly = true)
     @Override

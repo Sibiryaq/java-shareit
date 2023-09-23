@@ -32,11 +32,7 @@ public class BookingMapper {
                 .build();
     }
 
-    public Booking toBooking(BookingDto dto, Item item, User booker) {
-        return new Booking(dto.getId(), dto.getStart(), dto.getEnd(), item, booker, dto.getStatus());
-    }
-
-    public BookingDto toFullBookingFromBooking(Booking booking) throws NotFoundException {
+    public BookingDto toFullBookingFromBooking(Booking booking) {
         User booker = booking.getBooker();
         if (booker == null)
             throw new NotFoundException("Пользователь не найден");

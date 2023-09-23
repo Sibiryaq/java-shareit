@@ -16,10 +16,7 @@ import ru.practicum.shareit.user.User;
 import ru.practicum.shareit.user.storage.UserRepository;
 
 import java.time.LocalDateTime;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static ru.practicum.shareit.item.dto.ItemMapper.*;
@@ -73,15 +70,19 @@ public class ItemServiceImpl implements ItemService {
         }
     }
 
+    @Transactional
     public long getItemOwnerId(long itemId) {
         return itemRepository.getReferenceById(itemId).getUser().getId();
     }
 
     @Override
+    @Transactional
     public ItemDto getItem(long itemId, long ownerId) throws NotFoundException {
         return itemRepository.findById(itemId)
                 .map(item -> {
-                    List<CommentDto> comments = commentRepository.findAllByItemId(itemId).stream().map(CommentMapper::toCommentDto).collect(Collectors.toList());
+                    List<CommentDto> comments = commentRepository.findAllByItemId(itemId)
+                            .stream()
+                            .map(CommentMapper::toCommentDto).collect(Collectors.toList());
                     log.info("Получен предмет с id " + itemId);
 
                     List<BookingForItemDto> bookings = item.getUser().getId() == ownerId
@@ -97,6 +98,7 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
+    @Transactional
     public List<ItemDto> getAllItemsByOwner(long ownerId) {
         List<ItemDto> allItems =
                 itemRepository.findAllByOwnerId(ownerId).stream()
@@ -104,22 +106,14 @@ public class ItemServiceImpl implements ItemService {
                         .sorted(Comparator.comparing(ItemDto::getId))
                         .collect(Collectors.toList());
 
-        List<Comment> allCommentsByItemsOwner = commentRepository.findAllByItemsOwnerId(ownerId);
-        List<Booking> allBookingsByItemsOwner = bookingRepository.findAllByItemsOwnerId(ownerId);
-
         for (ItemDto item : allItems) {
+            List<Booking> bookings = bookingRepository.findAllByItemId(item.getId());
+            List<Comment> allCommentsByItemAndOwner = commentRepository.findAllByItemIdAndOwnerId(item.getId(), ownerId);
 
-            List<CommentDto> comments = allCommentsByItemsOwner
-                    .stream()
-                    .filter(l -> l.getItem().getId() == item.getId())
+            List<CommentDto> comments = allCommentsByItemAndOwner.stream()
                     .map(CommentMapper::toCommentDto)
                     .collect(Collectors.toList());
             item.setComments(comments);
-
-            List<Booking> bookings = allBookingsByItemsOwner
-                    .stream()
-                    .filter(l -> l.getItem().getId() == item.getId())
-                    .collect(Collectors.toList());
 
             if (bookings.size() != 0) {
                 item.setLastBooking(bookingMapper.toBookingForItemDto(bookings.get(0)));
@@ -129,8 +123,8 @@ public class ItemServiceImpl implements ItemService {
         return allItems;
     }
 
-
     @Override
+    @Transactional
     public List<ItemDto> searchItem(String text, long ownerId) {
         if (text.isBlank()) {
             return List.of();
@@ -142,14 +136,16 @@ public class ItemServiceImpl implements ItemService {
         }
     }
 
-    @Transactional
     @Override
+    @Transactional
     public Comment addComment(Comment dto, long itemId, long authorId) throws BadRequestException {
         LocalDateTime now = LocalDateTime.now();
 
         if (!bookingRepository.bookingsForItemAndBookerPast(authorId, itemId, now).isEmpty()) {
-            User author = userRepository.findById(authorId).orElseThrow(() -> new BadRequestException("Пользователь не найден"));
-            Item item = itemRepository.findById(itemId).orElseThrow(() -> new BadRequestException("Предмет не найден"));
+            User author = userRepository.findById(authorId).orElseThrow(() ->
+                    new BadRequestException("Пользователь не найден"));
+            Item item = itemRepository.findById(itemId).orElseThrow(() ->
+                    new BadRequestException("Предмет не найден"));
             Comment comment = new Comment();
             comment.setAuthor(author);
             comment.setItem(item);

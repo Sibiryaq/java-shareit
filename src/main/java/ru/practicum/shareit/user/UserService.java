@@ -17,7 +17,7 @@ public class UserService {
 
     private final UserRepository userRepository;
 
-    public User add(User user) throws ConflictException {
+    public User add(User user) {
         try {
             log.info("Добавлен новый User");
             return userRepository.save(user);
@@ -26,7 +26,7 @@ public class UserService {
         }
     }
 
-    public User getUserById(long id) throws NotFoundException {
+    public User getUserById(long id) {
         Optional<User> userIdDatabase = userRepository.findById(id);
         if (userIdDatabase.isPresent()) {
             log.info("Получен User с id: " + id);
@@ -40,7 +40,7 @@ public class UserService {
         return userRepository.findAll();
     }
 
-    public User update(User user, long id) throws NotFoundException {
+    public User update(User user, long id) {
         User userToUpdate = userRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("User не найден"));
 
