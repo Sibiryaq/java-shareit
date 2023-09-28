@@ -1,35 +1,42 @@
 package ru.practicum.shareit.item;
 
-import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.experimental.FieldDefaults;
+import lombok.Setter;
+import ru.practicum.shareit.request.ItemRequest;
 import ru.practicum.shareit.user.User;
 
 import javax.persistence.*;
 
-@Data
 @Entity
-@AllArgsConstructor
-@NoArgsConstructor
-@FieldDefaults(level = AccessLevel.PRIVATE)
 @Table(name = "items")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class Item {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    long id;
+    @Column(name = "item_id", nullable = false)
+    private Long id;
 
-    String name;
+    @Column(name = "item_name", nullable = false, length = 200)
+    private String name;
 
-    String description;
+    @Column(name = "description", nullable = false, length = 500)
+    private String description;
 
-    boolean available;
+    @Column(name = "is_available", nullable = false)
+    private Boolean available;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "owner_id")
-    User user;
+    private User owner;
 
-    @Column(name = "request_id")
-    long requestId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "request_id")
+    private ItemRequest request;
+
 }

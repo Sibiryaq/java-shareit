@@ -1,49 +1,51 @@
 package ru.practicum.shareit.user;
 
-import lombok.RequiredArgsConstructor;
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.shareit.exception.ConflictException;
-import ru.practicum.shareit.exception.NotFoundException;
+import ru.practicum.shareit.user.dto.UserDtoRequest;
+import ru.practicum.shareit.user.dto.UserDtoResponse;
+import ru.practicum.shareit.user.service.UserService;
 
 import javax.validation.Valid;
 import java.util.List;
 
-@Slf4j
 @RestController
 @RequestMapping(path = "/users")
-@RequiredArgsConstructor
+@AllArgsConstructor
+@Slf4j
 public class UserController {
-
     private final UserService userService;
 
     @PostMapping
-    public User add(@Valid @RequestBody User user) throws ConflictException {
-        log.info("Получен запрос POST /users");
-        return userService.add(user);
+    public UserDtoResponse createUser(@Valid @RequestBody UserDtoRequest userDtoRequest) {
+        log.info("User Controller: Пользователь создан. Его email: {}", userDtoRequest.getEmail());
+        return userService.createUser(userDtoRequest);
     }
 
-    @GetMapping(value = "/{id}")
-    public User getUserById(@PathVariable long id) throws NotFoundException {
-        log.info(String.format("Получен запрос GET /users/%s", id));
-        return userService.getUserById(id);
+    @PatchMapping("/{userId}")
+    public UserDtoResponse updateUser(@RequestBody UserDtoRequest userDtoRequest, @PathVariable long userId) {
+        log.info("User Controller: Пользователь обновлен. ID пользователя: {}", userId);
+        userDtoRequest.setId(userId);
+        return userService.updateUser(userDtoRequest);
+    }
+
+    @DeleteMapping("/{userId}")
+    public UserDtoResponse deleteUser(@PathVariable long userId) {
+        log.info("User Controller: Пользователь удален. ID пользователя было: {}", userId);
+        return userService.deleteUser(userId);
+    }
+
+    @GetMapping("/{userId}")
+    public UserDtoResponse getUser(@PathVariable long userId) {
+        log.info("User Controller: Получен пользователь. ID пользователя: {}", userId);
+        return userService.getUser(userId);
     }
 
     @GetMapping
-    public List<User> getAllUsers() {
-        log.info("Получен запрос GET /users");
-        return userService.getAllUsers();
+    public List<UserDtoResponse> getUsers() {
+        log.info("User Controller: Получены все пользователи");
+        return userService.getUsers();
     }
 
-    @PatchMapping(value = "/{id}")
-    public User update(@RequestBody User user, @PathVariable long id) throws NotFoundException {
-        log.info(String.format("Получен запрос PATCH /users/%s", id));
-        return userService.update(user, id);
-    }
-
-    @DeleteMapping(value = "/{id}")
-    public void delete(@PathVariable long id) {
-        log.info(String.format("Получен запрос DELETE /users/%s", id));
-        userService.delete(id);
-    }
 }

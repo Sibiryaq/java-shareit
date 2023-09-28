@@ -3,57 +3,58 @@ package ru.practicum.shareit.booking;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.shareit.booking.dto.BookingDto;
-import ru.practicum.shareit.booking.enums.BookingState;
-import ru.practicum.shareit.exception.BadRequestException;
-import ru.practicum.shareit.exception.NotFoundException;
+import ru.practicum.shareit.booking.dto.BookingDtoRequest;
+import ru.practicum.shareit.booking.dto.BookingDtoResponse;
+import ru.practicum.shareit.booking.service.BookingService;
 
 import javax.validation.Valid;
 import java.util.List;
 
-@Slf4j
 @RestController
 @RequestMapping(path = "/bookings")
 @AllArgsConstructor
+@Slf4j
 public class BookingController {
+    private static final String USER_HEADER = "X-Sharer-User-Id";
     private final BookingService bookingService;
 
     @PostMapping
-    public BookingDto addBooking(@Valid @RequestBody BookingDto dto,
-                                 @RequestHeader("X-Sharer-User-Id") long bookerId)
-            throws NotFoundException, BadRequestException {
-        log.info("Получен запрос POST /bookings");
-        return bookingService.addBooking(dto, bookerId);
+    public BookingDtoResponse createBooking(@Valid @RequestBody BookingDtoRequest bookingDtoRequest,
+                                            @RequestHeader(USER_HEADER) Long userId) {
+        log.info("Booking Controller: Создание бронирования. ID Пользователя {}", userId);
+        return bookingService.createBooking(bookingDtoRequest, userId);
     }
 
-    @PatchMapping("/{bookingId}")
-    public BookingDto approveBooking(@PathVariable long bookingId, @RequestParam boolean approved,
-                                     @RequestHeader("X-Sharer-User-Id") long bookerId)
-            throws NotFoundException, BadRequestException {
-        log.info("Получен запрос PATCH /bookings/" + bookingId + "?approved=" + approved);
-        return bookingService.approveBooking(bookingId, approved, bookerId);
+    @PatchMapping(value = "/{bookingId}")
+    public BookingDtoResponse changeState(@PathVariable Long bookingId,
+                                          @RequestParam Boolean approved,
+                                          @RequestHeader(USER_HEADER) Long userId) {
+        log.info("Booking Controller: изменение состояние бронирования. " +
+                "ID Пользователя {}, booking ID {}", userId, bookingId);
+        return bookingService.changeState(bookingId, approved, userId);
     }
 
-    @GetMapping("/{bookingId}")
-    public BookingDto getBooking(@PathVariable long bookingId, @RequestHeader("X-Sharer-User-Id") long bookerId)
-            throws NotFoundException {
-        log.info("Получен запрос GET /bookings/" + bookingId);
-        return bookingService.getBooking(bookingId, bookerId);
+    @GetMapping(value = "/{bookingId}")
+    public BookingDtoResponse getBooking(@PathVariable Long bookingId,
+                                         @RequestHeader(USER_HEADER) Long userId) {
+        log.info("Booking Controller: Получение бронирования. ID Пользователя {}," +
+                " ID бронирования {}", userId, bookingId);
+        return bookingService.getBooking(bookingId, userId);
     }
 
     @GetMapping
-    public List<BookingDto> getAllBookingsByBookerId(@RequestHeader("X-Sharer-User-Id") long bookerId,
-                                                     @RequestParam(defaultValue = "ALL") BookingState state)
-            throws NotFoundException {
-        log.info("Получен запрос GET /bookings?state=" + state.toString());
-        return bookingService.getAllBookingsByBookerId(bookerId, state);
+    public List<BookingDtoResponse> getOwnBookings(@RequestParam(name = "state", defaultValue = "ALL") String state,
+                                                   @RequestHeader(USER_HEADER) Long userId) {
+        log.info("Booking Controller: Получение владельца бронирования. " +
+                "ID пользователя {}, состояние - {}", userId, state);
+        return bookingService.getOwnBookings(state, userId);
     }
 
-    @GetMapping("/owner")
-    public List<BookingDto> getAllBookingItemsByBookerId(@RequestHeader("X-Sharer-User-Id") long ownerId,
-                                                         @RequestParam(defaultValue = "ALL") BookingState state)
-            throws NotFoundException {
-        log.info("Получен запрос GET /bookings/owner?state=" + state.toString());
-        return bookingService.getAllBookingByItemsByOwnerId(ownerId, state);
+    @GetMapping(value = "/owner")
+    public List<BookingDtoResponse> getOwnItemsBookings(@RequestParam(name = "state", defaultValue = "ALL") String state,
+                                                        @RequestHeader(USER_HEADER) Long userId) {
+        log.info("Booking Controller: Получение бронирований для предметов владельца. " +
+                "Пользователь с ID {}, состояние - {}", userId, state);
+        return bookingService.getOwnItemsBookings(state, userId);
     }
 }

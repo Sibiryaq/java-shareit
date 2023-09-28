@@ -1,39 +1,38 @@
 package ru.practicum.shareit.item;
 
-import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
-import lombok.experimental.FieldDefaults;
-import org.springframework.data.annotation.CreatedDate;
 import ru.practicum.shareit.user.User;
 
 import javax.persistence.*;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 
+@Entity
+@Table(name = "comments")
 @Getter
 @Setter
-@Entity
-@FieldDefaults(level = AccessLevel.PRIVATE)
+@NoArgsConstructor
+@AllArgsConstructor
 public class Comment {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    long id;
+    @Column(name = "comment_id")
+    private Long id;
 
-    @NotBlank
-    @NotNull
-    String text;
+    @Column(name = "text", nullable = false, length = 500)
+    private String text;
 
-    @CreatedDate
-    LocalDateTime created;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "item_id", nullable = false)
+    private Item item;
 
-    @ManyToOne
-    @JoinColumn(name = "item_id")
-    Item item;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "author_id", nullable = false)
+    private User author;
 
-    @ManyToOne
-    @JoinColumn(name = "author_id")
-    User author;
+    @Column(name = "created", nullable = false)
+    private LocalDateTime created;
 }
