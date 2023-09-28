@@ -11,10 +11,8 @@ import ru.practicum.shareit.user.User;
 import javax.persistence.*;
 import java.time.LocalDateTime;
 
-//Для поля status вам также пригодится @Enumerated
 @Entity
 @Table(name = "bookings")
-@Builder
 @Getter
 @Setter
 @NoArgsConstructor
