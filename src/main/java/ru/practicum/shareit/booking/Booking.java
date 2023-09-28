@@ -14,6 +14,7 @@ import java.time.LocalDateTime;
 //Для поля status вам также пригодится @Enumerated
 @Entity
 @Table(name = "bookings")
+@Builder
 @Getter
 @Setter
 @NoArgsConstructor
