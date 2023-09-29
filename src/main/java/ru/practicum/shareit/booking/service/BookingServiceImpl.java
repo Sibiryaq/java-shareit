@@ -94,6 +94,7 @@ public class BookingServiceImpl implements BookingService {
         return BookingMapper.toBookingDtoResponse(booking);
     }
 
+    @Transactional(readOnly = true)
     @Override
     public List<BookingDtoResponse> getOwnBookings(String state, Long userId) {
         BookingState parseState = checkState(state);
@@ -123,6 +124,7 @@ public class BookingServiceImpl implements BookingService {
         return BookingMapper.toBookingDtoResponsesList(bookings);
     }
 
+    @Transactional(readOnly = true)
     @Override
     public List<BookingDtoResponse> getOwnItemsBookings(String state, Long userId) {
         BookingState parseState = checkState(state);
@@ -157,11 +159,6 @@ public class BookingServiceImpl implements BookingService {
             return BookingState.valueOf(state);
         } catch (IllegalArgumentException e) {
             throw new BookingStatusException("Unknown state: UNSUPPORTED_STATUS");
-            /*
-            Если вместо Unknown state написать: "неизвестное состояние",
-            то два теста из постмана проваливаются, они именно требуют чтобы  было
-            equals Unknown state
-             */
         }
     }
 
