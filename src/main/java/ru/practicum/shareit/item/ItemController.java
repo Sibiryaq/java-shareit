@@ -1,59 +1,66 @@
 package ru.practicum.shareit.item;
 
-import lombok.RequiredArgsConstructor;
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import ru.practicum.shareit.item.dto.CommentDtoRequest;
+import ru.practicum.shareit.item.dto.CommentDtoResponse;
+import ru.practicum.shareit.item.dto.ItemDtoRequest;
+import ru.practicum.shareit.item.dto.ItemDtoResponse;
+import ru.practicum.shareit.item.service.ItemService;
 
 import javax.validation.Valid;
 import java.util.List;
 
-/**
- * TODO Sprint add-controllers.
- */
-@Slf4j
-@Validated
-@RequiredArgsConstructor
 @RestController
-@RequestMapping("/items")
+@RequestMapping(path = "/items")
+@AllArgsConstructor
+@Slf4j
 public class ItemController {
-
+    private static final String USER_HEADER = "X-Sharer-User-Id";
     private final ItemService itemService;
 
-    @ResponseStatus(HttpStatus.CREATED)
     @PostMapping
-    public ItemDto addNewItem(@Valid @RequestBody ItemDto itemDto,
-                              @RequestHeader("X-Sharer-User-Id") Long userId) {
-        log.info("Запрос на добавление новой вещи {} пользователем с id = {}", itemDto, userId);
-        return itemService.addNewItem(itemDto, userId);
+    public ItemDtoResponse createItem(@Valid @RequestBody ItemDtoRequest itemDtoRequest,
+                                      @RequestHeader(USER_HEADER) Long userId) {
+        log.info("Item Controller: Вещь создана. ID пользователя: {}", userId);
+        return itemService.createItem(itemDtoRequest, userId);
     }
 
-    @ResponseStatus(HttpStatus.OK)
     @PatchMapping("/{itemId}")
-    public ItemDto changeItem(@PathVariable Long itemId,
-                              @RequestHeader("X-Sharer-User-Id") Long userId,
-                              @Valid @RequestBody ItemDto itemDto) {
-        log.info("Запрос на обмен вещи {}", itemDto);
-        return itemService.updateItem(itemId, userId, itemDto);
+    public ItemDtoResponse updateOwnItem(@RequestBody ItemDtoRequest itemDtoRequest,
+                                         @PathVariable long itemId,
+                                         @RequestHeader(USER_HEADER) Long userId) {
+        log.info("Item Controller: Владелец вещи обновлен. ID пользователя: {}, ID вещи {}", userId, itemId);
+        itemDtoRequest.setId(itemId);
+        return itemService.updateOwnItem(itemDtoRequest, userId);
     }
 
     @GetMapping("/{itemId}")
-    public ItemDto getItemInfo(@PathVariable Long itemId) {
-        log.info("Запрос информации об вещи с id = {}", itemId);
-        return itemService.getItemInfo(itemId);
+    public ItemDtoResponse getItem(@PathVariable long itemId,
+                                   @RequestHeader(USER_HEADER) Long userId) {
+        log.info("Item Controller: Получена вещь. ID пользователя: {}, ID вещи: {}", userId, itemId);
+        return itemService.getItem(itemId, userId);
     }
 
     @GetMapping
-    public List<ItemDto> getAllItems(@RequestHeader("X-Sharer-User-Id") Long userId) {
-        log.info("user id = {} запрашивает список всех вещей", userId);
-        return itemService.getItemsByUserId(userId);
+    public List<ItemDtoResponse> getOwnItems(@RequestHeader(USER_HEADER) Long userId) {
+        log.info("Item Controller: Получены вещи пользователя. ID пользователя: {}", userId);
+        return itemService.getOwnItems(userId);
     }
 
-    @ResponseStatus(HttpStatus.OK)
     @GetMapping("/search")
-    public List<ItemDto> getAvailableItemsForRent(@RequestParam String text) {
-        log.info("Запрос на поиск {}", text);
-        return itemService.getAvailableItemsForRentByKeyword(text);
+    public List<ItemDtoResponse> searchItems(@RequestParam String text,
+                                             @RequestHeader(USER_HEADER) Long userId) {
+        log.info("Item Controller: Поиск вещей. ID пользователя: {}, запрос: {}", userId, text);
+        return itemService.searchItems(text, userId);
+    }
+
+    @PostMapping("/{itemId}/comment")
+    public CommentDtoResponse createComment(@Valid @RequestBody CommentDtoRequest commentDtoRequest,
+                                            @PathVariable long itemId,
+                                            @RequestHeader(USER_HEADER) Long userId) {
+        log.info("Item Controller: Создание комментария. ID пользователя: {} для вещи с ID {}", userId, itemId);
+        return itemService.createComment(commentDtoRequest, itemId, userId);
     }
 }
