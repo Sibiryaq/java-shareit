@@ -14,9 +14,7 @@ import ru.practicum.shareit.item.storage.ItemStorage;
 import ru.practicum.shareit.request.ItemRequest;
 import ru.practicum.shareit.request.ItemRequestMapper;
 import ru.practicum.shareit.request.ItemRequestStorage;
-import ru.practicum.shareit.request.dto.ItemRequestDtoRequest;
-import ru.practicum.shareit.request.dto.ItemRequestDtoResponse;
-import ru.practicum.shareit.request.dto.ItemRequestDtoWItemResponse;
+import ru.practicum.shareit.request.dto.*;
 import ru.practicum.shareit.user.User;
 import ru.practicum.shareit.user.UserStorage;
 
