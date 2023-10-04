@@ -6,8 +6,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.exception.NotFoundException;
-import ru.practicum.shareit.user.dto.UserDtoRequest;
-import ru.practicum.shareit.user.dto.UserDtoResponse;
+import ru.practicum.shareit.user.dto.*;
 import ru.practicum.shareit.user.service.UserService;
 
 import javax.persistence.EntityManager;
@@ -30,7 +29,10 @@ class UserServiceIntTest {
         UserDtoRequest userDtoRequest = new UserDtoRequest(null, "name", "mail@mail.ru");
         service.createUser(userDtoRequest);
 
-        TypedQuery<User> query = em.createQuery("select us from User as us where us.name = :name", User.class);
+        TypedQuery<User> query = em.createQuery(
+                "SELECT us " +
+                        "FROM User AS us " +
+                        "WHERE us.name = :name", User.class);
         User user = query.setParameter("name", userDtoRequest.getName()).getSingleResult();
 
         assertNotNull(user.getId());

@@ -7,11 +7,8 @@ import org.springframework.data.domain.Pageable;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.item.Item;
 import ru.practicum.shareit.item.storage.ItemStorage;
-import ru.practicum.shareit.request.dto.ItemRequestDtoRequest;
-import ru.practicum.shareit.request.dto.ItemRequestDtoResponse;
-import ru.practicum.shareit.request.dto.ItemRequestDtoWItemResponse;
-import ru.practicum.shareit.request.service.ItemRequestService;
-import ru.practicum.shareit.request.service.ItemRequestServiceImpl;
+import ru.practicum.shareit.request.dto.*;
+import ru.practicum.shareit.request.service.*;
 import ru.practicum.shareit.user.User;
 import ru.practicum.shareit.user.UserStorage;
 

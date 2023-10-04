@@ -1,8 +1,7 @@
 package ru.practicum.shareit.user;
 
 import org.junit.jupiter.api.Test;
-import ru.practicum.shareit.user.dto.UserDtoRequest;
-import ru.practicum.shareit.user.dto.UserDtoResponse;
+import ru.practicum.shareit.user.dto.*;
 
 import java.util.List;
 

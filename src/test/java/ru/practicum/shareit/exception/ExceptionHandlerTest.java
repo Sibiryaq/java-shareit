@@ -2,10 +2,6 @@ package ru.practicum.shareit.exception;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.web.bind.MissingServletRequestParameterException;
-
-import javax.validation.ConstraintViolationException;
-import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;

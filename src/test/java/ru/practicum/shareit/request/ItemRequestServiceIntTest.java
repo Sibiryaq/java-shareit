@@ -6,12 +6,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.exception.NotFoundException;
-import ru.practicum.shareit.request.dto.ItemRequestDtoRequest;
-import ru.practicum.shareit.request.dto.ItemRequestDtoResponse;
-import ru.practicum.shareit.request.dto.ItemRequestDtoWItemResponse;
+import ru.practicum.shareit.request.dto.*;
 import ru.practicum.shareit.request.service.ItemRequestService;
-import ru.practicum.shareit.user.dto.UserDtoRequest;
-import ru.practicum.shareit.user.dto.UserDtoResponse;
+import ru.practicum.shareit.user.dto.*;
 import ru.practicum.shareit.user.service.UserService;
 
 import javax.persistence.EntityManager;
@@ -40,7 +37,9 @@ class ItemRequestServiceIntTest {
         ItemRequestDtoRequest request = new ItemRequestDtoRequest("text");
         service.createRequest(request, user.getId());
         TypedQuery<ItemRequest> query2 = em.createQuery(
-                "select ir from ItemRequest as ir where ir.description = :text", ItemRequest.class);
+                "SELECT ir " +
+                        "FROM ItemRequest AS ir " +
+                        "WHERE ir.description = :text", ItemRequest.class);
         ItemRequest itemRequest = query2.setParameter("text", request.getDescription()).getSingleResult();
 
         assertNotNull(itemRequest);
