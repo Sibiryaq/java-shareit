@@ -26,4 +26,6 @@ public class ItemDtoResponse {
 
     private List<CommentDtoResponse> comments;
 
+    private Long requestId;
+
 }

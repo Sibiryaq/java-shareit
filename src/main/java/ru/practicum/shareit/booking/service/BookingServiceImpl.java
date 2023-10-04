@@ -2,6 +2,8 @@ package ru.practicum.shareit.booking.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -96,61 +98,67 @@ public class BookingServiceImpl implements BookingService {
 
     @Transactional(readOnly = true)
     @Override
-    public List<BookingDtoResponse> getOwnBookings(String state, Long userId) {
+    public List<BookingDtoResponse> getOwnBookings(String state, Long userId, Integer from, Integer size) {
         BookingState parseState = checkState(state);
-        checkUser(userId);
-        Sort sort = Sort.by("start").descending(); //вынес отдельно из конструкции switch
+        checkUserExist(userId);
+        Sort sort = Sort.by("start").descending();
         LocalDateTime time = LocalDateTime.now();
+        Pageable pageable = PageRequest.of(from / size, size, sort);
         List<Booking> bookings = new ArrayList<>();
         switch (parseState) {
             case ALL:
-                bookings = bookingStorage.findByBookerId(userId, sort);
+                bookings = bookingStorage.findByBookerId(userId, pageable).toList();
                 break;
             case CURRENT:
-                bookings = bookingStorage.findByBookerIdCurrent(userId, time);
+                bookings = bookingStorage.findByBookerIdCurrent(userId, time, pageable).toList();
                 break;
             case PAST:
-                bookings = bookingStorage.findByBookerIdAndEndIsBefore(userId, time, sort);
+                bookings = bookingStorage.findByBookerIdAndEndIsBefore(userId, time, pageable).toList();
                 break;
             case FUTURE:
-                bookings = bookingStorage.findByBookerIdAndStartIsAfter(userId, time, sort);
+                bookings = bookingStorage.findByBookerIdAndStartIsAfter(userId, time, pageable).toList();
                 break;
             case WAITING:
-                bookings = bookingStorage.findByBookerIdAndStatus(userId, BookingStatus.WAITING, sort);
+                bookings = bookingStorage.findByBookerIdAndStatus(userId, BookingStatus.WAITING, pageable).toList();
                 break;
             case REJECTED:
-                bookings = bookingStorage.findByBookerIdAndStatus(userId, BookingStatus.REJECTED, sort);
+                bookings = bookingStorage.findByBookerIdAndStatus(userId, BookingStatus.REJECTED, pageable).toList();
         }
+        log.info("Booking Service: Владелец бронирований найден. Количество: {}", bookings.size());
         return BookingMapper.toBookingDtoResponsesList(bookings);
     }
 
     @Transactional(readOnly = true)
     @Override
-    public List<BookingDtoResponse> getOwnItemsBookings(String state, Long userId) {
+    public List<BookingDtoResponse> getOwnItemsBookings(String state, Long userId, Integer from, Integer size) {
         BookingState parseState = checkState(state);
-        checkUser(userId);
+        checkUserExist(userId);
         Sort sort = Sort.by("start").descending();
         LocalDateTime time = LocalDateTime.now();
+        Pageable pageable = PageRequest.of(from / size, size, sort);
         List<Booking> bookings = new ArrayList<>();
         switch (parseState) {
             case ALL:
-                bookings = bookingStorage.findBookingByItemOwnerId(userId, sort);
+                bookings = bookingStorage.findBookingByItemOwnerId(userId, pageable).toList();
                 break;
             case CURRENT:
-                bookings = bookingStorage.findBookingByItemOwnerCurrent(userId, time);
+                bookings = bookingStorage.findBookingByItemOwnerCurrent(userId, time, pageable).toList();
                 break;
             case PAST:
-                bookings = bookingStorage.findBookingByItemOwnerIdAndEndIsBefore(userId, time, sort);
+                bookings = bookingStorage.findBookingByItemOwnerIdAndEndIsBefore(userId, time, pageable).toList();
                 break;
             case FUTURE:
-                bookings = bookingStorage.findBookingByItemOwnerIdAndStartIsAfter(userId, time, sort);
+                bookings = bookingStorage.findBookingByItemOwnerIdAndStartIsAfter(userId, time, pageable).toList();
                 break;
             case WAITING:
-                bookings = bookingStorage.findBookingByItemOwnerIdAndStatus(userId, BookingStatus.WAITING, sort);
+                bookings = bookingStorage.findBookingByItemOwnerIdAndStatus(
+                        userId, BookingStatus.WAITING, pageable).toList();
                 break;
             case REJECTED:
-                bookings = bookingStorage.findBookingByItemOwnerIdAndStatus(userId, BookingStatus.REJECTED, sort);
+                bookings = bookingStorage.findBookingByItemOwnerIdAndStatus(
+                        userId, BookingStatus.REJECTED, pageable).toList();
         }
+        log.info("Booking Service: Бронирования владельца найдены. Количество бронирований: {}", bookings.size());
         return BookingMapper.toBookingDtoResponsesList(bookings);
     }
 
@@ -162,9 +170,9 @@ public class BookingServiceImpl implements BookingService {
         }
     }
 
-    private void checkUser(Long userId) {
+    private void checkUserExist(Long userId) {
         if (!userStorage.existsUserById(userId)) {
-            throw new NotFoundException(String.format("Пользователя с ID %s не существует", userId));
+            throw new NotFoundException(String.format("Пользователь с ID %s не существует", userId));
         }
     }
 }
