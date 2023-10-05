@@ -17,7 +17,7 @@ import java.util.List;
 @RequiredArgsConstructor
 @Slf4j
 public class UserServiceImpl implements UserService {
-    public static final String USER_NOT_EXIST = "Пользователь с ID %s не найден";
+    public static final String USER_NOT_EXIST = "Пользователя с ID %s не существует";
     private final UserStorage userStorage;
 
     @Override
