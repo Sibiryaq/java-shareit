@@ -29,7 +29,8 @@ class ItemControllerTest {
     @MockBean
     private ItemService itemService;
 
-    private final ObjectMapper mapper = new ObjectMapper();
+    @Autowired
+    private ObjectMapper mapper;
 
     @Autowired
     private MockMvc mvc;

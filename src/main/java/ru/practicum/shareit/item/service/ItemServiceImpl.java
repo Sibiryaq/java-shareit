@@ -45,12 +45,17 @@ public class ItemServiceImpl implements ItemService {
     public ItemDtoResponse createItem(ItemDtoRequest itemDtoRequest, Long userId) {
         User owner = userStorage.findById(userId)
                 .orElseThrow(() -> new NotFoundException(String.format(ERR_USER, userId)));
-        ItemRequest itemRequest = itemDtoRequest.getRequestId() == null ? null : itemRequestStorage
-                .findById(itemDtoRequest.getRequestId())
-                .orElseThrow(() -> new NotFoundException(String.format(ERR_REQ, itemDtoRequest.getRequestId())));
+
         Item item = ItemMapper.toItem(itemDtoRequest);
         item.setOwner(owner);
-        item.setRequest(itemRequest);
+
+        if(itemDtoRequest.getRequestId() != null) {
+            ItemRequest itemRequest = itemRequestStorage
+                    .findById(itemDtoRequest.getRequestId())
+                    .orElseThrow(() -> new NotFoundException(String.format(ERR_REQ, itemDtoRequest.getRequestId())));
+            item.setRequest(itemRequest);
+        }
+
         Item result = itemStorage.save(item);
         log.info("Item Service: Вещь создана. ID вещи {}", result.getId());
         return ItemMapper.toItemDto(result);

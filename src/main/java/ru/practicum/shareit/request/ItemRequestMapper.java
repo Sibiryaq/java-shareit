@@ -2,9 +2,7 @@ package ru.practicum.shareit.request;
 
 import lombok.experimental.UtilityClass;
 import org.springframework.data.domain.Page;
-import ru.practicum.shareit.request.dto.ItemRequestDtoRequest;
-import ru.practicum.shareit.request.dto.ItemRequestDtoResponse;
-import ru.practicum.shareit.request.dto.ItemRequestDtoWItemResponse;
+import ru.practicum.shareit.request.dto.*;
 import ru.practicum.shareit.user.User;
 
 import java.time.LocalDateTime;
@@ -33,7 +31,7 @@ public class ItemRequestMapper {
 
     public static List<ItemRequestDtoWItemResponse> toItemRequestDtoWItemResponse(List<ItemRequest> itemRequests) {
         return itemRequests.stream()
-                .map((ItemRequest itemRequest) -> new ItemRequestDtoWItemResponse(
+                .map(itemRequest -> new ItemRequestDtoWItemResponse(
                         itemRequest.getId(),
                         itemRequest.getDescription(),
                         itemRequest.getCreated(),

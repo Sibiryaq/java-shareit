@@ -104,7 +104,7 @@ class ItemRequestServiceTest {
                 NotFoundException.class,
                 () -> itemRequestService.findByRequestId(1L, null)
         );
-        assertEquals("Пользователь пустой", exception.getMessage());
+        assertEquals("Пользователь пуст или его не существует вовсе: null", exception.getMessage());
     }
 
     @Test
@@ -116,7 +116,7 @@ class ItemRequestServiceTest {
                 NotFoundException.class,
                 () -> itemRequestService.findByRequestId(1L, 1L)
         );
-        assertEquals("Пользователя не существует: 1", exception.getMessage());
+        assertEquals("Пользователь пуст или его не существует вовсе: 1", exception.getMessage());
     }
 
     @Test

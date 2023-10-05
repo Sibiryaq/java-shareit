@@ -86,12 +86,9 @@ public class ItemRequestServiceImpl implements ItemRequestService {
     }
 
     private void checkUserExist(Long userId) {
-        if (userId == null) {
-            log.error("Пользователь пустой");
-            throw new NotFoundException("Пользователь пустой");
-        } else if (!userStorage.existsUserById(userId)) {
-            log.error("Пользователя нен существует: {}", userId);
-            throw new NotFoundException("Пользователя не существует: " + userId);
+        if (userId == null || !userStorage.existsUserById(userId)) {
+            log.error("Пользователь пуст или его не существует вовсе: {}", userId);
+            throw new NotFoundException("Пользователь пуст или его не существует вовсе: " + userId);
         }
     }
 }
