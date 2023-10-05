@@ -49,7 +49,7 @@ public class ItemServiceImpl implements ItemService {
         Item item = ItemMapper.toItem(itemDtoRequest);
         item.setOwner(owner);
 
-        if(itemDtoRequest.getRequestId() != null) {
+        if (itemDtoRequest.getRequestId() != null) {
             ItemRequest itemRequest = itemRequestStorage
                     .findById(itemDtoRequest.getRequestId())
                     .orElseThrow(() -> new NotFoundException(String.format(ERR_REQ, itemDtoRequest.getRequestId())));
