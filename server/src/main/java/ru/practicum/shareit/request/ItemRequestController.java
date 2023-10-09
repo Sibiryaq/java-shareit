@@ -15,7 +15,6 @@ import java.util.List;
 @RequestMapping(path = "/requests")
 @AllArgsConstructor
 @Slf4j
-@Validated
 public class ItemRequestController {
 
     private static final String USER_HEADER = "X-Sharer-User-Id";
